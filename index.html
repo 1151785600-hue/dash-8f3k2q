@@ -138,8 +138,13 @@ function render(D){
     '数据源：官方 API（Kimi/阶跃/百炼）+ 云厂商账单（火山/阿里云）+ 本地记账<br>' +
     '额度告警通过 Server酱 推送至微信 · 此页可添加到手机主屏幕';
 }
-if(window.DASH){ render(window.DASH); }
-else{ document.getElementById('ts').textContent = '未找到数据（data.js 缺失）'; }
+fetch('data.json?t=' + Date.now(), {cache:'no-store'})
+  .then(function(r){ return r.json(); })
+  .then(render)
+  .catch(function(){
+    if(window.DASH){ render(window.DASH); }
+    else{ document.getElementById('ts').textContent = '未找到数据（data.json 缺失）'; }
+  });
 </script>
 </body>
 </html>
