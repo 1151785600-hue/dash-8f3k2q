@@ -100,12 +100,19 @@ function render(D){
     const sp = c.spent_month||0, bd = c.budget||0;
     const p = pct(sp,bd);
     let dot='idle', amt='—', det=[];
-    if(c.balance!==null && c.balance!==undefined){
+    if(c.balance!==null && c.balance!==undefined && c.kind==='quota'){
+      dot='ok'; amt=(c.quota_models||0) + '<small>个模型配额</small>';
+      (c.picked||[]).forEach(function(x){ det.push(x.model+'：'+(x.usage_limit||'—')+' '+(x.unit||'')); });
+      det.push('账户余额 ' + money(c.balance) + ' 元');
+    } else if(c.balance!==null && c.balance!==undefined){
       amt = money(c.balance) + '<small>元</small>';
       dot = 'ok';
-      if(c.voucher!==null && c.voucher!==undefined) det.push('代金券 ' + money(c.voucher) + ' 元');
-      if(c.cash!==null && c.cash!==undefined) det.push('现金 ' + money(c.cash) + ' 元');
-      if(c.balance<=10) dot='bad'; else if(c.balance<=30) dot='warn';
+      if(c.voucher!==null && c.voucher!==undefined && c.voucher>0) det.push('代金券 ' + money(c.voucher) + ' 元');
+      if(c.cash!==null && c.cash!==undefined && c.cash>0) det.push('现金 ' + money(c.cash) + ' 元');
+      if(c.balance<0) dot='bad';
+      else if(c.balance===0) dot='warn';
+      else if(c.balance<=10) dot='bad';
+      else if(c.balance<=30) dot='warn';
     } else if(c.status==='pending_credentials'){
       dot='idle'; amt='待接入'; det.push(c.problem||'等待凭据');
     } else if(c.kind==='quota'){
@@ -115,7 +122,8 @@ function render(D){
       dot='idle'; amt='无官方接口';
       if(c.problem) det.push(c.problem);
     }
-    if(c.tokens_7d!==null && c.tokens_7d!==undefined) det.push('近 7 天 token ' + c.tokens_7d.toLocaleString());
+    if(c.usage_note) det.push(c.usage_note);
+    else if(c.tokens_7d!==null && c.tokens_7d!==undefined) det.push('近 7 天 token ' + c.tokens_7d.toLocaleString());
     if(c.note) det.push(c.note);
 
     const el = document.createElement('div');
