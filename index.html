@@ -50,6 +50,7 @@ a.btn:active{opacity:.75}
 .deals{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px}
 .deals .dh{font-size:14px;font-weight:600;margin-bottom:4px}
 .deals .dh span{color:var(--dim);font-size:11px;font-weight:400;margin-left:6px}
+.deals .more{float:right;font-size:11px;color:var(--accent);text-decoration:none;font-weight:400}
 .deals .it{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
 .deals .it:first-of-type{border-top:0}
 .deals .tx{flex:1;min-width:0}
@@ -119,9 +120,10 @@ function render(D){
   const pb = document.getElementById('promos');
   const pr = D.promos || {};
   if(pr.items && pr.items.length){
-    pb.innerHTML = '<div class="deals"><div class="dh">免费额度与优惠<span>'+
-      pr.items.length+' 条 · 更新 '+esc(String(pr.updated_at||'').slice(0,10))+'</span></div>'+
-      pr.items.map(function(x){
+    pb.innerHTML = '<div class="deals"><div class="dh">免费额度与优惠<span>共 '+
+      pr.items.length+' 条 · 更新 '+esc(String(pr.updated_at||'').slice(0,10))+
+      '</span><a class="more" href="https://buguoshixc.github.io/ai-deals-aggregator/" target="_blank" rel="noopener">全部 →</a></div>'+
+      pr.items.slice(0,5).map(function(x){
         return '<div class="it"><div class="tx"><div class="tt">'+esc(x.title)+
           '<span class="tag">'+esc(x.claim)+'</span></div><div class="vd">'+esc(x.vendor)+
           ' · '+esc(x.desc)+' · '+esc(x.expiry)+'</div></div>'+
