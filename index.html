@@ -75,7 +75,8 @@ a.btn:active{opacity:.75}
 function pct(v,b){ if(!b) return 0; return Math.min(100, Math.round(v/b*100)); }
 function cls(p){ return p>=90?'bad':(p>=70?'warn':'ok'); }
 function money(v){ if(v===null||v===undefined) return null;
-  return (Math.round(v*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}
+  return (Math.round(v*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
 function tk(n){
   if(n===null||n===undefined||isNaN(n)) return '—';
@@ -83,7 +84,7 @@ function tk(n){
   if(n>=1e8) return (n/1e8).toFixed(2)+' 亿';
   if(n>=1e4) return (n/1e4).toFixed(1)+' 万';
   return n.toLocaleString();
-}); }
+}
 
 function render(D){
   document.getElementById('ts').textContent = '数据更新于 ' + (D.generated_at||'—');
