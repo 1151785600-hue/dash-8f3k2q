@@ -165,8 +165,10 @@ function render(D){
       '<span class="tag">'+(c.kind==='balance'?'余额':(c.kind==='quota'?'配额':(c.kind==='token_quota'?'套餐':'自记账')))+'</span></div>'+
       '<div class="amt">'+amt+'</div>'+
       '<div class="det">'+det.join(' · ')+'</div>'+
-      '<div class="spend">本月花费（按单价估算）<b>'+money(sp)+'</b> 元 / 预算 '+money(bd)+' 元'+
-        (bd? '（'+p+'%）':'')+'</div>'+
+      (c.kind==='token_quota'
+        ? '<div class="spend">套餐内调用，不按次计费</div>'
+        : '<div class="spend">本月花费（按单价估算）<b>'+money(sp)+'</b> 元 / 预算 '+money(bd)+' 元'+
+          (bd? '（'+p+'%）':'')+'</div>')+
       (bd? '<div class="bar" style="margin-top:6px"><i style="width:'+p+'%;background:var(--'+cls(p)+')"></i></div>':'')+
       '<div class="acts">'+
         (c.links&&c.links.recharge?'<a class="btn p" href="'+c.links.recharge+'" target="_blank" rel="noopener">去充值</a>':'')+
