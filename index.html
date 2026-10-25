@@ -75,7 +75,15 @@ a.btn:active{opacity:.75}
 function pct(v,b){ if(!b) return 0; return Math.min(100, Math.round(v/b*100)); }
 function cls(p){ return p>=90?'bad':(p>=70?'warn':'ok'); }
 function money(v){ if(v===null||v===undefined) return null;
-  return (Math.round(v*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  return (Math.round(v*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}
+
+function tk(n){
+  if(n===null||n===undefined||isNaN(n)) return '—';
+  n=Number(n);
+  if(n>=1e8) return (n/1e8).toFixed(2)+' 亿';
+  if(n>=1e4) return (n/1e4).toFixed(1)+' 万';
+  return n.toLocaleString();
+}); }
 
 function render(D){
   document.getElementById('ts').textContent = '数据更新于 ' + (D.generated_at||'—');
@@ -100,12 +108,35 @@ function render(D){
     const sp = c.spent_month||0, bd = c.budget||0;
     const p = pct(sp,bd);
     let dot='idle', amt='—', det=[];
-    if(c.balance!==null && c.balance!==undefined && c.kind==='quota'){
+    if(c.kind==='token_quota'){
+      if(c.remain_tokens!==null && c.remain_tokens!==undefined){
+        var _u = c.unit || 'tokens';
+        dot='ok'; amt=tk(c.remain_tokens) + '<small>' + _u + ' 剩余</small>';
+        if(c.total_tokens) det.push('套餐总量 ' + tk(c.total_tokens) + ' ' + _u);
+        if(c.used_tokens!==null && c.used_tokens!==undefined) det.push('已用 ' + tk(c.used_tokens) + ' ' + _u);
+        if(c.used_pct!==null && c.used_pct!==undefined){
+          det.push('已用 ' + c.used_pct + '%');
+          if(c.used_pct>=85) dot='bad'; else if(c.used_pct>=70) dot='warn';
+        }
+      } else if(c.status==='pending_credentials'){
+        dot='idle'; amt='待接入'; det.push(c.problem||'等待凭据');
+      } else if(c.status==='ok'){
+        dot='ok'; amt='可用'; det.push(c.usage_note||'探针正常');
+      } else if(c.status==='exhausted'){
+        dot='bad'; amt='额度耗尽'; det.push(c.usage_note||'调用被拒绝');
+      } else {
+        dot='bad'; amt='读取失败'; det.push(c.problem||c.note||'接口异常');
+      }
+    } else if(c.kind==='usage'){
+      dot='ok'; amt='$' + money(c.used_usd) + '<small>已用</small>';
+      if(c.usage_note) det.push(c.usage_note);
+    } else if(c.balance!==null && c.balance!==undefined && c.kind==='quota'){
       dot='ok'; amt=(c.quota_models||0) + '<small>个模型配额</small>';
       (c.picked||[]).forEach(function(x){ det.push(x.model+'：'+(x.usage_limit||'—')+' '+(x.unit||'')); });
       det.push('账户余额 ' + money(c.balance) + ' 元');
     } else if(c.balance!==null && c.balance!==undefined){
-      amt = money(c.balance) + '<small>元</small>';
+      var unit = (c.currency && c.currency!=='CNY') ? c.currency : '元';
+      amt = (unit==='USD' ? '$' : '') + money(c.balance) + '<small>' + unit + '</small>';
       dot = 'ok';
       if(c.voucher!==null && c.voucher!==undefined && c.voucher>0) det.push('代金券 ' + money(c.voucher) + ' 元');
       if(c.cash!==null && c.cash!==undefined && c.cash>0) det.push('现金 ' + money(c.cash) + ' 元');
@@ -130,10 +161,10 @@ function render(D){
     el.className='card';
     el.innerHTML =
       '<div class="hd"><span class="dot '+dot+'"></span><span class="nm">'+c.name+'</span>'+
-      '<span class="tag">'+(c.kind==='balance'?'余额':(c.kind==='quota'?'配额':'自记账'))+'</span></div>'+
+      '<span class="tag">'+(c.kind==='balance'?'余额':(c.kind==='quota'?'配额':(c.kind==='token_quota'?'套餐':'自记账')))+'</span></div>'+
       '<div class="amt">'+amt+'</div>'+
       '<div class="det">'+det.join(' · ')+'</div>'+
-      '<div class="spend">本月花费 <b>'+money(sp)+'</b> 元 / 预算 '+money(bd)+' 元'+
+      '<div class="spend">本月花费（按单价估算）<b>'+money(sp)+'</b> 元 / 预算 '+money(bd)+' 元'+
         (bd? '（'+p+'%）':'')+'</div>'+
       (bd? '<div class="bar" style="margin-top:6px"><i style="width:'+p+'%;background:var(--'+cls(p)+')"></i></div>':'')+
       '<div class="acts">'+
