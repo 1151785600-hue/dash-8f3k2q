@@ -182,6 +182,7 @@ function render(D){
       dot='idle'; amt='无官方接口';
       if(c.problem) det.push(c.problem);
     }
+    if(c.stale){ dot='warn'; }
     if(c.probe && c.probe!=='ok'){ if(dot==='ok') dot='warn'; det.push('探活 '+c.probe); }
     if(c.usage_note) det.push(c.usage_note);
     else if(c.tokens_7d!==null && c.tokens_7d!==undefined) det.push('近 7 天 token ' + c.tokens_7d.toLocaleString());
